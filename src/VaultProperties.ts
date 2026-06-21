@@ -143,15 +143,6 @@ export default class VaultProperties {
 		return this.traversePath(localProperties, keys);
 	}
 
-	findPathsStartingWith(searchPath: string): string[] {
-		if (searchPath.length === 0) {
-			return this.getLocalKeysAndAllVariableKeys();
-		}
-		return this.getLocalKeysAndAllVariableKeys().filter((path) =>
-			path.startsWith(searchPath)
-		);
-	}
-
 	updateLocalKeysAndAllVariableKeys() {
 		this.localKeys = this.getAllPaths(this.getLocalProperties(), "", true);
 		this.localKeysAndAllVariableKeys = [

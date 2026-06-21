@@ -82,3 +82,19 @@ If your plugin does not need CSS, delete this file.
 	border-radius: 4px;
 	/* font-weight: bold; */
 }
+
+.lv-suggest-title {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+}
+
+.lv-suggest-name {
+	color: var(--text-normal);
+}
+
+.lv-suggest-path {
+	color: var(--text-muted);
+	font-size: var(--font-smaller);
+	margin-left: auto;
+}

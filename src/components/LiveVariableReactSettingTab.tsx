@@ -9,7 +9,7 @@ interface LiveVariableReactSettingTabProps {
 const LiveVariablesReactSettingTab: FC<LiveVariableReactSettingTabProps> = ({
 	plugin,
 }) => {
-	const [highlightText, setHighlightText] = useState<boolean>(true);
+	const [highlightText, setHighlightText] = useState<boolean>(false);
 	const [copyResolvedValues, setCopyResolvedValues] = useState<boolean>(true);
 
 	useEffect(() => {

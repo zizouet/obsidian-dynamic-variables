@@ -9,7 +9,7 @@ export interface LiveVariablesSettings {
 }
 
 export const DEFAULT_SETTINGS: LiveVariablesSettings = {
-	highlightText: true,
+	highlightText: false,
 	copyResolvedValues: true,
 };
 

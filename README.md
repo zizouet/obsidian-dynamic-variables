@@ -35,13 +35,13 @@ Local (current note) properties take priority over vault-wide references when na
 
 ## Autocomplete
 
-Type `{{` in any note to trigger autocomplete. Suggestions show the property key and a value preview. Selecting a suggestion inserts `{{key}}` and handles Obsidian's auto-closing brackets automatically.
+Type `{{` in any note to trigger autocomplete. Matching is fuzzy and **name-first**: type a fragment of a variable name (you don't need the path) to find it anywhere in the vault. Each suggestion shows the variable name prominently with its originating path as a muted reference on the side, plus a value preview. Selecting a suggestion inserts the full `{{path}}` reference and handles Obsidian's auto-closing brackets automatically.
 
 ## Settings
 
 | Setting | Default | Description |
 |---|---|---|
-| Highlight live text | On | Adds a visual highlight to rendered variable values |
+| Highlight live text | Off | Adds a visual highlight to rendered variable values |
 | Copy resolved values | On | When copying text, replaces `{{var}}` with its current value instead of the raw syntax |
 
 ### Custom highlighting

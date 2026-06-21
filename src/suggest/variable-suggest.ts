@@ -4,6 +4,9 @@ import {
 	EditorSuggest,
 	EditorSuggestContext,
 	EditorSuggestTriggerInfo,
+	prepareFuzzySearch,
+	renderResults,
+	SearchResult,
 	TFile,
 } from "obsidian";
 import LiveVariables from "../main";
@@ -11,9 +14,26 @@ import { trancateString } from "../utils";
 import { Properties } from "../VaultProperties";
 
 export interface Property {
+	// Full reference inserted into the document, e.g. "Notes/Budget.md.rate".
 	key: string;
+	// Leaf property name shown prominently and matched against first ("rate").
+	name: string;
+	// De-emphasized path reference shown to the side ("Notes/Budget.md").
+	path: string;
 	value: string;
+	// Fuzzy match on the name, used to highlight matched characters.
+	match?: SearchResult;
 }
+
+// Splits a full key into its leaf variable name and the preceding path. The last
+// "." or "/" separates the name from the path (folder/file/nested-property chain).
+const splitKey = (key: string): { name: string; path: string } => {
+	const sep = Math.max(key.lastIndexOf("."), key.lastIndexOf("/"));
+	if (sep === -1) {
+		return { name: key, path: "" };
+	}
+	return { name: key.slice(sep + 1), path: key.slice(0, sep) };
+};
 
 // Matches an open, not-yet-closed {{ token from the start of the line up to the
 // cursor, capturing the partial variable name typed so far.
@@ -61,17 +81,67 @@ export class VariableSuggest extends EditorSuggest<Property> {
 
 	getSuggestions(context: EditorSuggestContext): Property[] {
 		const vaultProperties = this.plugin.vaultProperties;
-		return vaultProperties
-			.findPathsStartingWith(context.query.trim())
+		const candidates = vaultProperties
+			.getLocalKeysAndAllVariableKeys()
 			.filter((key) => hasVariableValue(vaultProperties.getProperty(key)))
 			.map((key) => ({
 				key,
+				...splitKey(key),
 				value: vaultProperties.getPropertyPreview(key),
+			}));
+
+		const query = context.query.trim();
+		if (query.length === 0) {
+			return candidates;
+		}
+
+		// Match the variable name first; fall back to the path so cross-vault
+		// references stay reachable, but always rank name matches ahead of them.
+		const fuzzy = prepareFuzzySearch(query);
+		return candidates
+			.map((candidate) => {
+				const nameResult = fuzzy(candidate.name);
+				const pathResult = fuzzy(candidate.path);
+				return {
+					...candidate,
+					match: nameResult ?? undefined,
+					nameResult,
+					pathResult,
+				};
+			})
+			.filter((c) => c.nameResult !== null || c.pathResult !== null)
+			.sort((a, b) => {
+				const aRank: [number, number] = a.nameResult
+					? [0, -a.nameResult.score]
+					: [1, -(a.pathResult?.score ?? 0)];
+				const bRank: [number, number] = b.nameResult
+					? [0, -b.nameResult.score]
+					: [1, -(b.pathResult?.score ?? 0)];
+				return aRank[0] - bRank[0] || aRank[1] - bRank[1];
+			})
+			.map(({ key, name, path, value, match }) => ({
+				key,
+				name,
+				path,
+				value,
+				match,
 			}));
 	}
 
 	renderSuggestion(property: Property, el: HTMLElement): void {
-		el.createEl("div", { text: property.key });
+		const title = el.createDiv({ cls: "lv-suggest-title" });
+		const nameEl = title.createSpan({ cls: "lv-suggest-name" });
+		if (property.match) {
+			renderResults(nameEl, property.name, property.match);
+		} else {
+			nameEl.setText(property.name);
+		}
+		if (property.path) {
+			title.createSpan({
+				cls: "lv-suggest-path",
+				text: property.path,
+			});
+		}
 		el.createEl("small", {
 			text: trancateString(property.value, 100),
 		});
