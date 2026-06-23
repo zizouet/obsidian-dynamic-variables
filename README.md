@@ -6,7 +6,7 @@
 
 </div>
 
-An [Obsidian](https://obsidian.md) plugin that lets you reference note properties as inline variables anywhere in your vault using `{{variable}}` syntax. Values render inline in both Live Preview and Reading mode.
+An [Obsidian plugin](https://community.obsidian.md/plugins/inline-properties) that lets you reference note properties as inline variables anywhere in your vault using `{{variable}}` syntax. Values render inline in both Live Preview and Reading mode.
 
 ## How it works
 
